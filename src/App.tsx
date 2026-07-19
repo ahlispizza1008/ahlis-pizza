@@ -254,20 +254,45 @@ export default function App() {
     verifyAdminStatus();
   }, [user]);
 
-  // Enforce admin route protection
-  useEffect(() => {
-    const enforceAdminProtection = () => {
-      if (currentPath.startsWith('/admin')) {
-        if (isAdminChecking) return;
-        
-        if (!user || !isAdmin) {
-          alert("Access Denied");
-          navigateTo('/');
-        }
-      }
-    };
-    enforceAdminProtection();
-  }, [currentPath, user, isAdmin, isAdminChecking]);
+  // Render Admin pages
+if (currentPath.startsWith('/admin')) {
+  // Wait until admin check finishes
+  if (isAdminChecking) {
+    return (
+      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
+        <RotateCw className="w-10 h-10 text-[#e63946] animate-spin" />
+        <p className="text-sm font-semibold text-stone-500">
+          Verifying admin access...
+        </p>
+      </div>
+    );
+  }
+
+  // If not logged in OR not admin
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
+        <AlertCircle className="w-10 h-10 text-red-500" />
+        <p className="text-sm font-semibold text-stone-500">
+          Access Denied
+        </p>
+      </div>
+    );
+  }
+
+  // If admin confirmed
+  return (
+    <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
+      {currentPath === '/admin' ? (
+        <AdminDashboard onNavigate={navigateTo} />
+      ) : currentPath === '/admin/orders' ? (
+        <AdminOrders />
+      ) : currentPath === '/admin/menu' ? (
+        <AdminMenu />
+      ) : null}
+    </AdminLayout>
+  );
+}
 
   // Auto-select first category when loaded
   useEffect(() => {
