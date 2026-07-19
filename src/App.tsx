@@ -254,41 +254,6 @@ export default function App() {
     verifyAdminStatus();
   }, [user]);
 
-  // Render Admin pages
-if (currentPath.startsWith('/admin')) {
-
-  if (isAdminChecking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <RotateCw className="w-8 h-8 animate-spin text-[#e63946]" />
-      </div>
-    );
-  }
-
-  if (isAdmin === false) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">
-        Access Denied
-      </div>
-    );
-  }
-
-  if (isAdmin === true) {
-    return (
-      <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
-        {currentPath === '/admin' ? (
-          <AdminDashboard onNavigate={navigateTo} />
-        ) : currentPath === '/admin/orders' ? (
-          <AdminOrders />
-        ) : currentPath === '/admin/menu' ? (
-          <AdminMenu />
-        ) : null}
-      </AdminLayout>
-    );
-  }
-
-  return null;
-}
 
   // Auto-select first category when loaded
   useEffect(() => {
