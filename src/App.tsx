@@ -257,7 +257,6 @@ export default function App() {
   // Render Admin pages
 if (currentPath.startsWith('/admin')) {
 
-  // Wait until admin role check finishes
   if (isAdminChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -266,7 +265,6 @@ if (currentPath.startsWith('/admin')) {
     );
   }
 
-  // If explicitly not admin
   if (isAdmin === false) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">
@@ -275,7 +273,6 @@ if (currentPath.startsWith('/admin')) {
     );
   }
 
-  // If admin confirmed
   if (isAdmin === true) {
     return (
       <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
@@ -292,7 +289,6 @@ if (currentPath.startsWith('/admin')) {
 
   return null;
 }
-  );
 }
 
   // Auto-select first category when loaded
