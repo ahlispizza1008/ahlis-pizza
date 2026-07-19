@@ -548,7 +548,7 @@ Thank you.`;
     setIsCartOpen(false);
   };
 
-  const sqlScript = `-- Create orders table if it doesn't exist with all required columns
+  const sqlScript = `-- Create orders table if it doesn't exist
 CREATE TABLE IF NOT EXISTS public.orders (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at timestamptz DEFAULT now(),
@@ -558,15 +558,14 @@ CREATE TABLE IF NOT EXISTS public.orders (
   payment_method text NOT NULL,
   upi_id text,
   order_status text DEFAULT 'received',
+  payment_status text DEFAULT 'pending',
   total_amount numeric NOT NULL,
   special_instructions text,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   order_number SERIAL UNIQUE
 );
 
--- Ensure order_number column exists if table was already created
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS order_number SERIAL UNIQUE;
-
--- Create order_items table if it doesn't exist with all required columns
+-- Create order_items table
 CREATE TABLE IF NOT EXISTS public.order_items (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at timestamptz DEFAULT now(),
@@ -577,41 +576,64 @@ CREATE TABLE IF NOT EXISTS public.order_items (
   price numeric NOT NULL
 );
 
--- Grant SELECT/INSERT permissions to public/anon role on all tables
-GRANT SELECT ON public.categories TO anon;
-GRANT SELECT ON public.menu_items TO anon;
-GRANT SELECT ON public.menu_sizes TO anon;
-GRANT INSERT, SELECT ON public.orders TO anon;
-GRANT INSERT, SELECT ON public.order_items TO anon;
-
--- Ensure Row Level Security (RLS) is enabled
+-- Enable RLS
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.menu_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.menu_sizes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
--- Recreate policies cleanly to prevent "already exists" errors
+-- Public menu access (SAFE ✅)
 DROP POLICY IF EXISTS "Allow public select access" ON public.categories;
-CREATE POLICY "Allow public select access" ON public.categories FOR SELECT USING (true);
+CREATE POLICY "Allow public select access"
+ON public.categories FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Allow public select access" ON public.menu_items;
-CREATE POLICY "Allow public select access" ON public.menu_items FOR SELECT USING (true);
+CREATE POLICY "Allow public select access"
+ON public.menu_items FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Allow public select access" ON public.menu_sizes;
-CREATE POLICY "Allow public select access" ON public.menu_sizes FOR SELECT USING (true);
+CREATE POLICY "Allow public select access"
+ON public.menu_sizes FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "Allow public insert access" ON public.orders;
-CREATE POLICY "Allow public insert access" ON public.orders FOR INSERT WITH CHECK (true);
+-- 🔐 SECURE ORDER POLICIES
 
+-- Remove unsafe policies
 DROP POLICY IF EXISTS "Allow public select access" ON public.orders;
-CREATE POLICY "Allow public select access" ON public.orders FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow public insert access" ON public.orders;
 
-DROP POLICY IF EXISTS "Allow public insert access" ON public.order_items;
-CREATE POLICY "Allow public insert access" ON public.order_items FOR INSERT WITH CHECK (true);
+-- Users can view ONLY their own orders
+CREATE POLICY "Users can view their own orders"
+ON public.orders
+FOR SELECT
+USING (auth.uid() = user_id);
 
+-- Users can insert ONLY their own orders
+CREATE POLICY "Users can insert their own orders"
+ON public.orders
+FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- Secure order_items
 DROP POLICY IF EXISTS "Allow public select access" ON public.order_items;
-CREATE POLICY "Allow public select access" ON public.order_items FOR SELECT USING (true);`;
+DROP POLICY IF EXISTS "Allow public insert access" ON public.order_items;
+
+CREATE POLICY "Users can view their own order items"
+ON public.order_items
+FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM public.orders
+    WHERE orders.id = order_items.order_id
+    AND orders.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can insert order items"
+ON public.order_items
+FOR INSERT
+WITH CHECK (true);
+`;
 
   const handleCopySql = () => {
     navigator.clipboard.writeText(sqlScript);
