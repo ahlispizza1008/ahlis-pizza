@@ -256,41 +256,42 @@ export default function App() {
 
   // Render Admin pages
 if (currentPath.startsWith('/admin')) {
-  // Wait until admin check finishes
+
+  // Wait until admin role check finishes
   if (isAdminChecking) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
-        <RotateCw className="w-10 h-10 text-[#e63946] animate-spin" />
-        <p className="text-sm font-semibold text-stone-500">
-          Verifying admin access...
-        </p>
+      <div className="min-h-screen flex items-center justify-center">
+        <RotateCw className="w-8 h-8 animate-spin text-[#e63946]" />
       </div>
     );
   }
 
-  // If not logged in OR not admin
-  if (!user || !isAdmin) {
+  // If explicitly not admin
+  if (isAdmin === false) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
-        <AlertCircle className="w-10 h-10 text-red-500" />
-        <p className="text-sm font-semibold text-stone-500">
-          Access Denied
-        </p>
+      <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">
+        Access Denied
       </div>
     );
   }
 
   // If admin confirmed
-  return (
-    <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
-      {currentPath === '/admin' ? (
-        <AdminDashboard onNavigate={navigateTo} />
-      ) : currentPath === '/admin/orders' ? (
-        <AdminOrders />
-      ) : currentPath === '/admin/menu' ? (
-        <AdminMenu />
-      ) : null}
-    </AdminLayout>
+  if (isAdmin === true) {
+    return (
+      <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
+        {currentPath === '/admin' ? (
+          <AdminDashboard onNavigate={navigateTo} />
+        ) : currentPath === '/admin/orders' ? (
+          <AdminOrders />
+        ) : currentPath === '/admin/menu' ? (
+          <AdminMenu />
+        ) : null}
+      </AdminLayout>
+    );
+  }
+
+  return null;
+}
   );
 }
 
