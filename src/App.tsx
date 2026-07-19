@@ -656,8 +656,14 @@ CREATE POLICY "Allow public select access" ON public.order_items FOR SELECT USIN
     }
 
     if (!user || !isAdmin) {
-      return null; // enforceAdminProtection effect will redirect
-    }
+  navigateTo('/');
+  return (
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
+      <RotateCw className="w-10 h-10 text-[#e63946] animate-spin" />
+      <p className="text-sm font-semibold text-stone-500">Redirecting...</p>
+    </div>
+  );
+}
 
     return (
       <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
