@@ -1,0 +1,6 @@
+{
+  "name": "Supabase Menu Viewer",
+  "description": "A dynamic restaurant menu viewer loaded directly from a Supabase database.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
