@@ -19,9 +19,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
+        const { data } = await supabase.auth.getSession();
+        const currentSession = data.session;
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
@@ -31,5 +32,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, 
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    } finally {
+      setUser(null);
+      setSession(null);
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
