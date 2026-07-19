@@ -289,7 +289,6 @@ if (currentPath.startsWith('/admin')) {
 
   return null;
 }
-}
 
   // Auto-select first category when loaded
   useEffect(() => {
