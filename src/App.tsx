@@ -68,6 +68,7 @@ const getCurrentTimeString = () => {
 };
 
 export default function App() {
+	const notificationAudio = new Audio("https://jcyxbpoergyslwcwjluv.supabase.co/storage/v1/object/public/assets/notification.mp3");
   const { 
     categories, 
     menuItems, 
@@ -170,6 +171,13 @@ export default function App() {
     };
     initPushNotifications();
   }, []);
+  useEffect(() => {
+  if (typeof Notification !== "undefined") {
+    Notification.requestPermission().then((permission) => {
+      console.log("Notification permission:", permission);
+    });
+  }
+}, []);
 
   const navigateTo = (path: string) => {
     window.history.pushState(null, '', path);
@@ -178,6 +186,40 @@ export default function App() {
 
   // Global Auth Integration
   const { user, session, loading: authLoading, signOut } = useAuth();
+  // 🔔 ADMIN REALTIME ORDER NOTIFICATION
+useEffect(() => {
+  if (!user || !isAdmin) return;
+
+  const channel = supabase
+    .channel("admin-order-listener")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "orders",
+      },
+      (payload) => {
+        console.log("New Order Detected:", payload);
+
+        // Play sound
+        audio.play().catch(() => {});
+
+        // Show popup
+        if (Notification.permission === "granted") {
+          new Notification("🍕 New Order Received!", {
+            body: "A new order has been placed.",
+            icon: "/logo192.png",
+          });
+        }
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [user, isAdmin]);
   
   const handleLogout = async () => {
     try {
@@ -666,43 +708,44 @@ WITH CHECK (true);
     );
   }
 
-  // Render Admin pages
-  if (currentPath.startsWith('/admin')) {
-    if (isAdminChecking) {
-      return (
-        <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
-          <RotateCw className="w-10 h-10 text-[#e63946] animate-spin" />
-          <p className="text-sm font-semibold text-stone-500">Verifying credentials...</p>
-        </div>
-      );
-    }
+ // Render Admin pages
+if (currentPath.startsWith('/admin')) {
 
-    if (!user || !isAdmin) {
-  navigateTo('/');
-  return (
-    <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
-      <RotateCw className="w-10 h-10 text-[#e63946] animate-spin" />
-      <p className="text-sm font-semibold text-stone-500">Redirecting...</p>
-    </div>
-  );
-}
-
+  if (isAdminChecking) {
     return (
-      <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
-        {currentPath === '/admin' ? (
-          <AdminDashboard onNavigate={navigateTo} />
-        ) : currentPath === '/admin/orders' ? (
-          <AdminOrders />
-        ) : currentPath === '/admin/menu' ? (
-          <AdminMenu />
-        ) : (
-          <div className="p-8 text-center text-stone-500">
-            Page not found. Redirecting...
-          </div>
-        )}
-      </AdminLayout>
+      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
+        <RotateCw className="w-10 h-10 text-[#e63946] animate-spin" />
+        <p className="text-sm font-semibold text-stone-500">Verifying credentials...</p>
+      </div>
     );
   }
+
+  if (!user || !isAdmin) {
+    navigateTo('/');
+    return (
+      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center space-y-4">
+        <RotateCw className="w-10 h-10 text-[#e63946] animate-spin" />
+        <p className="text-sm font-semibold text-stone-500">Redirecting...</p>
+      </div>
+    );
+  }
+
+  return (
+    <AdminLayout currentPath={currentPath} onNavigate={navigateTo}>
+      {currentPath === '/admin' ? (
+        <AdminDashboard onNavigate={navigateTo} />
+      ) : currentPath === '/admin/orders' ? (
+        <AdminOrders />
+      ) : currentPath === '/admin/menu' ? (
+        <AdminMenu />
+      ) : (
+        <div className="p-8 text-center text-stone-500">
+          Page not found.
+        </div>
+      )}
+    </AdminLayout>
+  );
+}
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-stone-900 font-sans selection:bg-red-100 selection:text-red-900 flex flex-col relative overflow-x-hidden">
