@@ -74,26 +74,32 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentPath, onNavigat
     }
   };
 
-  const navItems = [
-    {
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      path: '/admin',
-      active: currentPath === '/admin'
-    },
-    {
-      label: 'Kitchen Orders',
-      icon: ShoppingBag,
-      path: '/admin/orders',
-      active: currentPath === '/admin/orders'
-    },
-    {
-      label: 'Menu Management',
-      icon: ChefHat,
-      path: '/admin/menu',
-      active: currentPath === '/admin/menu'
-    }
-  ];
+ const navItems = [
+  {
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    path: '/admin',
+    active: currentPath === '/admin'
+  },
+  {
+    label: 'Kitchen Orders',
+    icon: ShoppingBag,
+    path: '/admin/orders',
+    active: currentPath === '/admin/orders'
+  },
+  {
+    label: 'Menu Management',
+    icon: ChefHat,
+    path: '/admin/menu',
+    active: currentPath === '/admin/menu'
+  },
+  {
+    label: 'Change Password',
+    icon: ShieldCheck,
+    path: '/admin/change-password',
+    active: currentPath === '/admin/change-password'
+  }
+];
 
   const sidebarContent = (
     <div className="h-full flex flex-col justify-between bg-[#1d3557] text-white p-5 border-r border-blue-950/20">
