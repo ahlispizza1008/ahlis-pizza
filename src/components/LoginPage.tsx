@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { Mail, Lock, LogIn, ArrowRight, Pizza, AlertCircle } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Pizza, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface LoginPageProps {
@@ -14,6 +14,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ✅ GOOGLE LOGIN FUNCTION
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      console.error("Google login error:", error.message);
+      setError("Google login failed.");
+      setLoading(false);
+    }
+  };
+
+  // ✅ EMAIL/PASSWORD LOGIN
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -28,7 +48,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
       if (error) throw error;
       onSuccess();
     } catch (err: any) {
-      console.error('Login error:', err);
       const errMsg = err.message || '';
       const lowerMsg = errMsg.toLowerCase();
 
@@ -54,11 +73,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden text-left"
       >
-        <div className="bg-[#1d3557] py-8 px-8 text-white text-center relative overflow-hidden">
+        <div className="bg-[#1d3557] py-8 px-8 text-white text-center">
           <div className="inline-flex p-3 bg-[#e63946] rounded-2xl text-white shadow-md mb-3">
             <Pizza className="w-6 h-6 stroke-[2.5]" />
           </div>
-          <h2 className="font-serif text-2xl font-black tracking-tight">Ahli's Pizza Club</h2>
+          <h2 className="font-serif text-2xl font-black tracking-tight">
+            Ahli's Pizza Club
+          </h2>
           <p className="text-[10px] font-mono tracking-widest text-amber-200 uppercase font-bold mt-1">
             Sign in to savor exclusive rewards
           </p>
@@ -73,6 +94,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
           )}
 
           <form onSubmit={handleLogin} className="flex flex-col gap-5">
+
+            {/* Email */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold">
                 Email Address
@@ -92,6 +115,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
               </div>
             </div>
 
+            {/* Password */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-mono uppercase tracking-wider text-stone-500 font-bold">
                 Password
@@ -111,13 +135,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
               </div>
             </div>
 
+            {/* Sign In Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-[#e63946] hover:bg-[#d62839] disabled:bg-stone-200 text-white font-bold uppercase text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-[#e63946] hover:bg-[#d62839] disabled:bg-stone-200 text-white font-bold uppercase text-xs rounded-xl transition-all"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
+
+            {/* Google Button */}
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="w-full py-3.5 bg-white border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold uppercase text-xs rounded-xl transition-all"
+            >
+              Sign in with Google
+            </button>
+
           </form>
 
           <div className="mt-8 text-center">
