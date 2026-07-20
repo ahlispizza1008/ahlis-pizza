@@ -135,6 +135,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate, onSuccess }) =
               </div>
             </div>
 
+            <div className="text-right">
+  <button
+    type="button"
+    onClick={() => onNavigate('/forgot-password')}
+    className="text-xs text-[#e63946] font-bold hover:underline"
+  >
+    Forgot Password?
+  </button>
+</div>
+
             {/* Sign In Button */}
             <button
               type="submit"

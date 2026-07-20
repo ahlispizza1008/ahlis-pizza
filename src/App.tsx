@@ -45,6 +45,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from './contexts/AuthContext';
 import { LoginPage } from './components/LoginPage';
 import { SignupPage } from './components/SignupPage';
+import { ForgotPassword } from './components/ForgotPassword';
+import { UpdatePassword } from './components/UpdatePassword';
 import { MyOrdersPage } from './components/MyOrdersPage';
 import { AdminLayout } from './components/AdminLayout';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -1093,12 +1095,16 @@ if (currentPath.startsWith('/admin')) {
 
       <div className="pt-20 flex-1 flex flex-col">
         {currentPath === '/login' ? (
-          <LoginPage onNavigate={navigateTo} onSuccess={() => navigateTo('/')} />
-        ) : currentPath === '/signup' ? (
-          <SignupPage onNavigate={navigateTo} />
-        ) : currentPath === '/my-orders' ? (
-          <MyOrdersPage onNavigate={navigateTo} />
-        ) : (
+  <LoginPage onNavigate={navigateTo} onSuccess={() => navigateTo('/')} />
+) : currentPath === '/signup' ? (
+  <SignupPage onNavigate={navigateTo} />
+) : currentPath === '/forgot-password' ? (
+  <ForgotPassword onNavigate={navigateTo} />
+) : currentPath === '/update-password' ? (
+  <UpdatePassword />
+) : currentPath === '/my-orders' ? (
+  <MyOrdersPage onNavigate={navigateTo} />
+) : (
           <>
           {/* Premium Hero Section */}
           <section className="relative h-[580px] w-full bg-[#1d3557] flex items-center justify-center overflow-hidden">
