@@ -234,10 +234,14 @@ useEffect(() => {
   
   // Automatically redirect to homepage after successful login
   useEffect(() => {
-    if (user && (currentPath === '/login' || currentPath === '/signup')) {
-      navigateTo('/');
-    }
-  }, [user, currentPath]);
+  if (
+    user &&
+    (currentPath === '/login' || currentPath === '/signup') &&
+    currentPath !== '/update-password'
+  ) {
+    navigateTo('/');
+  }
+}, [user, currentPath]);
 
   // Protect Cart, Checkout and corresponding routes from unauthenticated access
   useEffect(() => {
