@@ -15,11 +15,12 @@ export const ForgotPassword = ({ onNavigate }: any) => {
       redirectTo: window.location.origin + "/update-password",
     });
 
-    if (error) {
-      setMessage("Error sending reset email.");
-    } else {
-      setMessage("Password reset email sent. Please check your inbox.");
-    }
+   if (error) {
+  console.error("Reset error:", error);
+  setMessage(error.message);
+} else {
+  setMessage("Password reset email sent. Please check your inbox.");
+}
 
     setLoading(false);
   };
